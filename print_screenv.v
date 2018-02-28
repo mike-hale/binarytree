@@ -18,13 +18,18 @@ output TxD;
    wire                 tx_active;
    wire                 tfifo_rd;
    reg                  tfifo_rd_z;
-   reg [seq_dp_width-1:0]  tx_data;
+   reg [7:0]            tx_data;
    reg [3:0]               state;
+	wire [7:0] o_rx_data;
+	
+	initial begin
+	  state <= 0;
+	end
 
-assign o_tx_busy = (state!=stIdle);
+assign o_tx_busy = (state!=0);
 assign tfifo_rd = ~tfifo_empty & ~tx_active & ~tfifo_rd_z;
 
-   assign tfifo_wr = ~tfifo_full & (state!=stIdle);
+   assign tfifo_wr = ~tfifo_full & (state!=0);
    
    uart_fifo tfifo_ (// Outputs
                      .fifo_cnt          (),
@@ -39,12 +44,24 @@ assign tfifo_rd = ~tfifo_empty & ~tx_active & ~tfifo_rd_z;
                      // Inputs
                      .clk               (clk),
                      .rst               (rst));
+							
+	parameter [63:0] string = "ESKEDIT";
 
-   always @ (posedge clk)
+   always @ (posedge clk) begin
      if (rst)
        tfifo_rd_z <= 1'b0;
      else
        tfifo_rd_z <= tfifo_rd;
+	  if (~tfifo_full)
+	    if (state == 7)
+		   state <= 0;
+		 else
+		   state <= state + 1;
+	end
+		 
+   always @* begin
+	  tfifo_in = string >> (56 - 8*state);
+	end
 
    uart uart_ (// Outputs
                .received                (o_rx_valid),
@@ -52,9 +69,9 @@ assign tfifo_rd = ~tfifo_empty & ~tx_active & ~tfifo_rd_z;
                .is_receiving            (),
                .is_transmitting         (tx_active),
                .recv_error              (),
-               .tx                      (o_tx),
+               .tx                      (TxD),
                // Inputs
-               .rx                      (i_rx),
+               .rx                      (RxD),
                .transmit                (tfifo_rd_z),
                .tx_byte                 (tfifo_out[7:0]),
                /*AUTOINST*/

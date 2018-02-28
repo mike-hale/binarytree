@@ -4,7 +4,7 @@ int main()
 {
   HANDLE hComm;
 
-  hComm = CreateFile(“COM1”,                //port name
+  hComm = CreateFile("\\\\.\\COM22",                //port name
                       GENERIC_READ | GENERIC_WRITE, //Read/Write
                       0,                            // No Sharing
                       NULL,                         // No Security
@@ -13,9 +13,9 @@ int main()
                       NULL);        // Null for Comm Devices
 
   if (hComm == INVALID_HANDLE_VALUE)
-      printf(“Error in opening serial port”);
+      printf("Error in opening serial port\n");
   else
-      printf(“opening serial port successful”);
+      printf("opening serial port successful\n");
 
   DCB dcbSerialParams = { 0 };
   dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
