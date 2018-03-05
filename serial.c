@@ -74,6 +74,11 @@ int main()
         game_board[packet->player_y][packet->player_x] = 'X';
       else
         game_board[packet->player_y][packet->player_x] = '@';
+      /* Print out gameboard */
+      for (int i = 0; i < BOARD_HEIGHT; i++) {
+        write(0, game_board[i], BOARD_WIDTH);
+        printf("\n");
+      }
     }
     else
       continue;

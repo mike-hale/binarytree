@@ -19,6 +19,7 @@ reg [39:0] wave_bitfield[2:0];
 
 /* Game variables */
 reg [15:0] high_score;
+reg [15:0] current_score;
 reg [23:0] speed_ctrl;
 wire [175:0] packet;
 
@@ -29,3 +30,11 @@ assemble_pack pack_assembler (.clk(clk),
                               .wave_bitfield(wave_bitfield),
                               .packet(packet));
 
+wire top, bottom, left, right, center;
+reg deb_clk;
+
+redb top_db (.in_sig(btnu), .out_sig(top), .deb_clk(deb_clk));
+redb top_db (.in_sig(btnd), .out_sig(bottom), .deb_clk(deb_clk));
+redb top_db (.in_sig(btnl), .out_sig(left), .deb_clk(deb_clk));
+redb top_db (.in_sig(btnr), .out_sig(right), .deb_clk(deb_clk));
+redb top_db (.in_sig(btns), .out_sig(center), .deb_clk(deb_clk));
