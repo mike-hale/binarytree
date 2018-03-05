@@ -21,3 +21,4 @@ always @(posedge deb_clk) begin
     out_sig <= 0;
 end
     
+endmodule

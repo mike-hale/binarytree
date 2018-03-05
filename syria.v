@@ -57,8 +57,12 @@ end
 assemble_pack pack_assembler (.clk(clk),
                               .player_x(player_x),
                               .player_y(player_y),
-                              .wave_y(wave_y),
-                              .wave_bitfield(wave_bitfield),
+                              .wave1_y(wave_y[0]),
+                              .wave2_y(wave_y[1]),
+                              .wave3_y(wave_y[2]),
+                              .wave1_bitfield(wave_bitfield[0]),
+                              .wave2_bitfield(wave_bitfield[1]),
+                              .wave3_bitfield(wave_bitfield[2]),
                               .packet(packet));
 
 print_screen screen_printer (.RxD(RxD),
@@ -81,11 +85,11 @@ always @(posedge clk) begin
     speed_cnt <= speed_cnt + 1;
 end
 
-redb top_db (.in_sig(btnu), .out_sig(top),    .deb_clk(deb_clk));
-redb top_db (.in_sig(btnd), .out_sig(bottom), .deb_clk(deb_clk));
-redb top_db (.in_sig(btnl), .out_sig(left),   .deb_clk(deb_clk));
-redb top_db (.in_sig(btnr), .out_sig(right),  .deb_clk(deb_clk));
-redb top_db (.in_sig(btns), .out_sig(center), .deb_clk(deb_clk));
+redb top_db    (.in_sig(btnu), .out_sig(top),    .deb_clk(deb_clk));
+redb bottom_db (.in_sig(btnd), .out_sig(bottom), .deb_clk(deb_clk));
+redb left_db   (.in_sig(btnl), .out_sig(left),   .deb_clk(deb_clk));
+redb right_db  (.in_sig(btnr), .out_sig(right),  .deb_clk(deb_clk));
+redb center_db (.in_sig(btns), .out_sig(center), .deb_clk(deb_clk));
 
 always @(top)
   player_y <= player_y + 1;
@@ -105,3 +109,5 @@ always @(posedge speed_clk) begin
   else
     wave_y[0] <= wave_y - 1;
 end
+
+endmodule
