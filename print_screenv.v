@@ -1,10 +1,11 @@
 module print_screen(
 RxD,
 TxD,
-clk
-    );
+clk,
+packet);
 
 input RxD, clk;
+input wire [175:0] packet;
 output TxD;
 
 /*AUTOWIRE*/
@@ -44,8 +45,7 @@ assign tfifo_rd = ~tfifo_empty & ~tx_active & ~tfifo_rd_z;
                      // Inputs
                      .clk               (clk),
                      .rst               (rst));
-							
-	parameter [63:0] string = "ESKEDIT";
+						
 
    always @ (posedge clk) begin
      if (rst)
@@ -60,7 +60,7 @@ assign tfifo_rd = ~tfifo_empty & ~tx_active & ~tfifo_rd_z;
 	end
 		 
    always @* begin
-	  tfifo_in = string >> (56 - 8*state);
+	  tfifo_in = packet >> (176 - 8*state);
 	end
 
    uart uart_ (// Outputs
