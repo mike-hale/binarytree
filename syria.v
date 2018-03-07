@@ -27,7 +27,7 @@ reg [15:0] high_score;
 reg [15:0] current_score;
 reg [25:0] speed_ctrl;
 reg [25:0] speed_cnt;
-reg speed_clk, death;
+reg speed_clk, death, death1, death2, death3;
 wire [175:0] packet;
 
 /* Button variables */
@@ -53,7 +53,9 @@ initial begin
   wave_bitfield[1] <= 'hffffffffff;
   wave_bitfield[2] <= 'hffffffffff;
   score_sw <= 0;
-  death <= 0;
+  death1 <= 0;
+  death2 <= 0;
+  death3 <= 0;
 end
 
 assemble_pack pack_assembler (.clk(clk),
@@ -97,13 +99,15 @@ redb left_db   (.in_sig(btnl), .out_sig(left),   .deb_clk(deb_clk));
 redb right_db  (.in_sig(btnr), .out_sig(right),  .deb_clk(deb_clk));
 redb center_db (.in_sig(btns), .out_sig(center), .deb_clk(deb_clk));
 
+assign death = death1 | death2 | death3;
+
 always @(posedge top, posedge bottom) begin
   if (top == 1 && player_y > 1) begin
-    death <= is_dead(player_x, player_y + 1, wave_y[0], wave_y[1], wave_y[2],
+    death1 <= is_dead(player_x, player_y + 1, wave_y[0], wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);
     player_y <= player_y + 1;
   end else if (bottom == 1 && player_y < board_height - 2) begin
-    death <= is_dead(player_x, player_y - 1, wave_y[0], wave_y[1], wave_y[2],
+    death1 <= is_dead(player_x, player_y - 1, wave_y[0], wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);
     player_y <= player_y - 1;
   end
@@ -111,11 +115,11 @@ end
 
 always @(posedge left, posedge right) begin
   if (left == 1 && player_x > 0) begin
-    death <= is_dead(player_x - 1, player_y, wave_y[0], wave_y[1], wave_y[2],
+    death2 <= is_dead(player_x - 1, player_y, wave_y[0], wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);
     player_x <= player_x - 1;
   end else if (right == 1 && player_x < board_width - 1) begin
-    death <= is_dead(player_x + 1, player_y, wave_y[0], wave_y[1], wave_y[2],
+    death2 <= is_dead(player_x + 1, player_y, wave_y[0], wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);
     player_x <= player_x + 1;
   end
@@ -123,11 +127,11 @@ end
 
 always @(posedge speed_clk) begin
   if (wave_y[0] == 1) begin
-    death <= is_dead(player_x, player_y, board_height - 2, wave_y[1], wave_y[2],
+    death3 <= is_dead(player_x, player_y, board_height - 2, wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);
     wave_y[0] <= board_height - 2;
   end else begin
-    death <= is_dead(player_x, player_y, wave_y[0] - 1, wave_y[1], wave_y[2],
+    death3 <= is_dead(player_x, player_y, wave_y[0] - 1, wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);
     wave_y[0] <= wave_y[0] - 1;
   end

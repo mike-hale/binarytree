@@ -48,11 +48,25 @@ int main()
     game_board[0][i] = '#';
     game_board[BOARD_HEIGHT - 1][i] = '*';
   }
-
+ 
+  /* Start reading packets */
   char pack_buf[22];
   DWORD nbytes;
   int bytes_read;
   while (1) {
+    /* Align to next header */
+    char header;
+    while(1) {
+      ReadFile(hComm, &header, 1, &nbytes, NULL);
+      if (header == 0x55) {
+        ReadFile(hComm, &header, 1, &nbytes, NULL);
+        if (header == 0xAA) {
+          bytes_read = 2;
+          break;
+        }
+      }
+    }
+
     ReadFile (hComm, &pack_buf + bytes_read, sizeof(pack_buf) - bytes_read, &nbytes, NULL);
     bytes_read += nbytes;
     if (bytes_read == sizeof(pack_buf)) {

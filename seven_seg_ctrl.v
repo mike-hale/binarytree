@@ -19,17 +19,18 @@ always @* begin
 
   /* Correctly set segments */
   case (digit)
-    0: seg = 'b00111111;
+    0: seg = 'b00111111; //Also O character
     1: seg = 'b00000110;
     2: seg = 'b01011011;
     3: seg = 'b01001111;
     4: seg = 'b01100110;
-    5: seg = 'b01101101;
+    5: seg = 'b01101101; //Also S character
     6: seg = 'b01111101;
     7: seg = 'b00000111;
     8: seg = 'b01111111;
     9: seg = 'b01101111;
-    default: seg = 8'b0;
+    10: seg = 'b00111000; //L character
+    11: seg = 'b01111001; //E character
   endcase
 end
 
