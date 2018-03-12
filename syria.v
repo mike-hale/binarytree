@@ -6,13 +6,15 @@ module syria (RxD,  //Incoming serial data
               btnl, //left button
               btnd, //bottom button
               btnr, //right button
-              sw); //switch
+              sw,
+				  led); //switch
 				  
 input RxD, clk, btns, btnu, btnl, btnd, btnr, sw;
 output TxD;
+output [4:0] led;
 
 /* Parameters */
-parameter deb_div = 2500;
+parameter deb_div = 25000000;
 parameter board_height = 20;
 parameter board_width = 40;
 
@@ -34,7 +36,7 @@ wire [175:0] packet;
 /* Button variables */
 wire top, bottom, left, right, center;
 reg deb_clk, score_sw;
-reg [11:0] deb_cnt;
+reg [31:0] deb_cnt;
 
 /* Initial */
 initial begin
@@ -90,6 +92,12 @@ always @(posedge clk) begin
     speed_cnt <= speed_cnt + 1;
 end
 
+assign led[0] = deb_clk;
+assign led[1] = btnu;
+assign led[2] = btnd;
+assign led[3] = btnl;
+assign led[4] = btnr;
+
 /* Switch sampling */
 always @(posedge deb_clk)
   score_sw <= sw;
@@ -102,7 +110,7 @@ redb center_db (.in_sig(btns), .out_sig(center), .deb_clk(deb_clk));
 
 assign death = death1 | death2 | death3;
 
-always @(posedge top, posedge bottom) begin
+always @(top or bottom) begin
   if (top == 1 /*&& player_y > 1*/) begin
     death1 <= is_dead(player_x, player_y + 1, wave_y[0], wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);

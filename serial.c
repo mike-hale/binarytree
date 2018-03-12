@@ -22,9 +22,9 @@ int main()
 {
   HANDLE hComm;
 
-  hComm = CreateFile("COM_stream.txt",                //port name
-                      GENERIC_READ,// | GENERIC_WRITE, //Read/Write
-                      FILE_SHARE_READ | FILE_SHARE_WRITE,                            // No Sharing
+  hComm = CreateFile("\\\\.\\COM23",                //port name
+                      GENERIC_READ | GENERIC_WRITE, //Read/Write
+                      0,//only for file FILE_SHARE_READ | FILE_SHARE_WRITE,                            // No Sharing
                       NULL,                         // No Security
                       OPEN_EXISTING,// Open existing port only
                       0,            // Non Overlapped I/O
@@ -34,15 +34,15 @@ int main()
       printf("Error in opening serial port\n");
   else
       printf("opening serial port successful\n");
-/*
+  printf("Sizof %d\n", sizeof(struct pack_str));
   DCB dcbSerialParams = { 0 };
   dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
   GetCommState(hComm, &dcbSerialParams);
-  dcbSerialParams.BaudRate = 9600;
+  dcbSerialParams.BaudRate = 1000000;
   dcbSerialParams.ByteSize = 8;
   dcbSerialParams.StopBits = ONESTOPBIT;
   dcbSerialParams.Parity = NOPARITY;
-*/
+  
   char game_board[BOARD_HEIGHT][BOARD_WIDTH];
   /* Fill in top and bottom */
   for (int i = 0; i < BOARD_WIDTH; i++) {
@@ -54,25 +54,26 @@ int main()
   DWORD nbytes;
   int bytes_read;
 
-  /* Align to next header */
-  char header;
-  while(1) {
-    ReadFile(hComm, &header, 1, &nbytes, NULL);
-    if (nbytes == 0) {
-      printf("Sleeping\n");
-      Sleep(50000);
-    }
-    printf("Byte: 0x%02x\n", header & 0xFF);
-    if ((header & 0xFF) == 0xAA) {
-      ReadFile(hComm, &header, 1, &nbytes, NULL);
-      if ((header & 0xFF) == 0x55) {
-        bytes_read = 2;
-        break;
-      }
-    }
-  }
   /* Start reading packets */
   while (1) {
+	/* Align to next header */
+    char header;
+	BEGIN:
+    while(1) {
+      ReadFile(hComm, &header, 1, &nbytes, NULL);
+      if (nbytes == 0) {
+        printf("Sleeping\n");
+        Sleep(50000);
+      }
+      //printf("Byte: 0x%02x\n", header & 0xFF);
+      if ((header & 0xFF) == 0xAA) {
+        ReadFile(hComm, &header, 1, &nbytes, NULL);
+        if ((header & 0xFF) == 0x55) {
+          bytes_read = 2;
+          break;
+        }
+      }
+    }
     ReadFile (hComm, pack_buf + bytes_read, sizeof(pack_buf) - bytes_read, &nbytes, NULL);
     bytes_read += nbytes;
     if (bytes_read == sizeof(pack_buf)) {
@@ -87,8 +88,7 @@ int main()
         int bf_index = i / 8;
         int mask = (1 << (i % 8));
         if (packet->wave1_y >= BOARD_HEIGHT || packet->wave2_y >= BOARD_HEIGHT || packet->wave3_y >= BOARD_HEIGHT) {
-          printf("Invalid heigh fields\n");
-          Sleep(50000);
+          goto BEGIN;
         }
         game_board[packet->wave1_y][i] = (packet->wave1_bf[bf_index] & mask) ? '^' : ' ';
         game_board[packet->wave2_y][i] = (packet->wave2_bf[bf_index] & mask) ? '^' : ' ';
@@ -98,6 +98,8 @@ int main()
           if (j != packet->wave1_y && j != packet->wave2_y && j != packet->wave3_y)
             game_board[j][i] = ' ';
       }
+	  if (packet->player_y >= BOARD_HEIGHT || packet->player_x >= BOARD_WIDTH)
+		  goto BEGIN;
       /* Place player */
       if (game_board[packet->player_y][packet->player_x] == '^' ||
           packet->player_y == 0 || packet->player_y == BOARD_HEIGHT - 1)
