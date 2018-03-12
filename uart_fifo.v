@@ -35,6 +35,14 @@ module uart_fifo (/*AUTOARG*/
 
    assign wr = (fifo_wr & ~fifo_full);
    assign rd = (fifo_rd & ~fifo_empty);
+	
+	initial begin
+	  wp[sizew-1:0]       <= {(sizew){1'b0}};
+     rp[sizew-1:0]       <= {(sizew){1'b0}};
+     fifo_cnt[sizew-1:0] <= {(sizew){1'b0}};
+     fifo_full           <= 1'b0;
+     fifo_empty          <= 1'b1;
+	end
    
    always @ (posedge clk)
      if (rst)

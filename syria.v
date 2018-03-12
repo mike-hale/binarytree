@@ -6,7 +6,7 @@ module syria (RxD,  //Incoming serial data
               btnl, //left button
               btnd, //bottom button
               btnr, //right button
-              sw);  //switch
+              sw); //switch
 				  
 input RxD, clk, btns, btnu, btnl, btnd, btnr, sw;
 output TxD;
@@ -27,7 +27,8 @@ reg [15:0] high_score;
 reg [15:0] current_score;
 reg [25:0] speed_ctrl;
 reg [25:0] speed_cnt;
-reg speed_clk, death, death1, death2, death3;
+reg speed_clk, death1, death2, death3;
+wire death;
 wire [175:0] packet;
 
 /* Button variables */
@@ -40,7 +41,7 @@ initial begin
   /* clk vars */
   deb_clk <= 0;
   deb_cnt <= 0;
-  speed_ctrl <= 50000000;
+  speed_ctrl <= 50000;
   speed_cnt <= 0;
   speed_clk <= 0;
   /* positions */
@@ -49,9 +50,9 @@ initial begin
   wave_y[0] <= board_height - 2;
   wave_y[1] <= board_height - 2;
   wave_y[2] <= board_height - 2;
-  wave_bitfield[0] <= 'hffffffffff;
-  wave_bitfield[1] <= 'hffffffffff;
-  wave_bitfield[2] <= 'hffffffffff;
+  wave_bitfield[0] <= 40'hffffffffff;
+  wave_bitfield[1] <= 40'hffffffffff;
+  wave_bitfield[2] <= 40'hffffffffff;
   score_sw <= 0;
   death1 <= 0;
   death2 <= 0;
@@ -102,11 +103,11 @@ redb center_db (.in_sig(btns), .out_sig(center), .deb_clk(deb_clk));
 assign death = death1 | death2 | death3;
 
 always @(posedge top, posedge bottom) begin
-  if (top == 1 && player_y > 1) begin
+  if (top == 1 /*&& player_y > 1*/) begin
     death1 <= is_dead(player_x, player_y + 1, wave_y[0], wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);
     player_y <= player_y + 1;
-  end else if (bottom == 1 && player_y < board_height - 2) begin
+  end else if (bottom == 1 /*&& player_y < board_height - 2*/) begin
     death1 <= is_dead(player_x, player_y - 1, wave_y[0], wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);
     player_y <= player_y - 1;
@@ -114,11 +115,11 @@ always @(posedge top, posedge bottom) begin
 end 
 
 always @(posedge left, posedge right) begin
-  if (left == 1 && player_x > 0) begin
+  if (left == 1 /*&& player_x > 0*/) begin
     death2 <= is_dead(player_x - 1, player_y, wave_y[0], wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);
     player_x <= player_x - 1;
-  end else if (right == 1 && player_x < board_width - 1) begin
+  end else if (right == 1 /*&& player_x < board_width - 1*/) begin
     death2 <= is_dead(player_x + 1, player_y, wave_y[0], wave_y[1], wave_y[2],
                      wave_bitfield[0], wave_bitfield[1], wave_bitfield[2]);
     player_x <= player_x + 1;
@@ -139,7 +140,8 @@ end
 
 /* Function to determine if space is occupied by drones */
 function is_dead;
-input player_x, player_y, wave1_y, wave2_y, wave3_y, wave1_bfield, wave2_bfield, wave3_bfield;
+input player_x, player_y, wave1_y, wave2_y, wave3_y;
+input [39:0] wave1_bfield, wave2_bfield, wave3_bfield;
 begin
   if ((player_y == wave1_y && wave1_bfield[player_x] == 1) ||
       (player_y == wave2_y && wave2_bfield[player_x] == 1) ||

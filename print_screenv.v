@@ -20,7 +20,7 @@ output TxD;
    wire                 tfifo_rd;
    reg                  tfifo_rd_z;
    reg [7:0]            tx_data;
-   reg [3:0]               state;
+   reg [4:0]               state;
 	wire [7:0] o_rx_data;
 	
 	initial begin
@@ -44,23 +44,20 @@ assign tfifo_rd = ~tfifo_empty & ~tx_active & ~tfifo_rd_z;
                      /*AUTOINST*/
                      // Inputs
                      .clk               (clk),
-                     .rst               (rst));
+                     .rst               (1'b0));
 						
 
    always @ (posedge clk) begin
-     if (rst)
-       tfifo_rd_z <= 1'b0;
-     else
-       tfifo_rd_z <= tfifo_rd;
+     tfifo_rd_z <= tfifo_rd;
 	  if (~tfifo_full)
-	    if (state == 7)
+	    if (state == 22)
 		   state <= 0;
 		 else
 		   state <= state + 1;
 	end
 		 
    always @* begin
-	  tfifo_in = packet >> (176 - 8*state);
+	  tfifo_in = packet >> (8*(state - 1));
 	end
 
    uart uart_ (// Outputs
