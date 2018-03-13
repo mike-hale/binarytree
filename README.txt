@@ -41,4 +41,6 @@ Serial.c converts packet to a gameboard:
    |      |     |  |     |    |      |     |       \  |
    |      |     |  |     |    |      |     |        | |
    |       \___/    \___/     |_____  \___/     ___/  |_____
+                    High Score: 100000
+                    Your Score: 100000
             (Press the center button to play again)

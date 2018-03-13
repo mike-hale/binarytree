@@ -1,10 +1,11 @@
 module print_screen(
+print_e,
 RxD,
 TxD,
 clk,
 packet);
 
-input RxD, clk;
+input RxD, clk, print_e;
 input wire [175:0] packet;
 output TxD;
 
@@ -21,10 +22,12 @@ output TxD;
    reg                  tfifo_rd_z;
    reg [7:0]            tx_data;
    reg [4:0]               state;
+   reg                  prev_pe;
 	wire [7:0] o_rx_data;
 	
 	initial begin
 	  state <= 0;
+      prev_pe <= 0;
 	end
 
 assign o_tx_busy = (state!=0);
@@ -49,11 +52,14 @@ assign tfifo_rd = ~tfifo_empty & ~tx_active & ~tfifo_rd_z;
 
    always @ (posedge clk) begin
      tfifo_rd_z <= tfifo_rd;
+     prev_pe <= print_e;
 	  if (~tfifo_full)
 	    if (state == 22)
-		   state <= 0;
-		 else
-		   state <= state + 1;
+		  state <= 0;
+		else if (state > 0)
+		  state <= state + 1;
+        else if (prev_pe == 0 && print_e == 1)
+          state <= 1;
 	end
 		 
    always @* begin
